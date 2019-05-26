@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import me.dmdev.rxpm.base.PmSupportFragment
 
-abstract class Screen : PmSupportFragment<ScreenPm> {
+abstract class Screen<T: ScreenPm> : PmSupportFragment<T> {
 
     constructor() : super()
 
@@ -25,5 +25,7 @@ abstract class Screen : PmSupportFragment<ScreenPm> {
         onInitView(view)
     }
 
-    abstract fun onInitView(view: View)
+    open fun onInitView(view: View) {
+        // do nothing
+    }
 }

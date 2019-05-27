@@ -38,15 +38,16 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
         when (message) {
             is Back -> back()
             is OpenHomeScreen -> setRootScreen(HomeScreen())
-            is OpenChangeCityScreen -> openScreen(ChangeCityScreen.newInstance(message.tag))
+            is OpenChangeCityScreen -> openScreen(ChangeCityScreen.newInstance(message.tag), R.anim.slide_in_bottom, R.anim.slide_out_bottom)
             is CityChanged -> backTo<HomeScreen>()?.onCityChanged(message.tag, message.city)
         }
         return true
     }
 
-    private fun openScreen(screen: Fragment) {
+    private fun openScreen(screen: Fragment, inAnimation: Int = 0, outAnimation: Int = 0) {
         supportFragmentManager
             .beginTransaction()
+            .setCustomAnimations(inAnimation, 0, 0, outAnimation)
             .add(containerId, screen)
             .addToBackStack(screen::class.java.canonicalName)
             .commit()

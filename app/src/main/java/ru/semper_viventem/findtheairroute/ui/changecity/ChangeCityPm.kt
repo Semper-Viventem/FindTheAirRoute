@@ -1,5 +1,7 @@
 package ru.semper_viventem.findtheairroute.ui.changecity
 
+import io.reactivex.disposables.Disposable
+import me.dmdev.rxpm.bindProgress
 import me.dmdev.rxpm.widget.inputControl
 import ru.semper_viventem.findtheairroute.domain.City
 import ru.semper_viventem.findtheairroute.domain.FindCitiesByNameInteractor
@@ -16,6 +18,8 @@ class ChangeCityPm(
         private const val MIN_INPUT_SYMBOLS = 3
     }
 
+    private var searchDisposable: Disposable? = null
+
     val input = inputControl()
     val cities = State<List<City>>()
     val progress = State(false)
@@ -27,17 +31,32 @@ class ChangeCityPm(
 
         input.textChanges.observable
             .filter { it.length >= MIN_INPUT_SYMBOLS }
-            .flatMapSingle { query ->
-                findCitiesByNameInteractor.execute(query)
-            }
-            .doOnNext(cities.consumer)
-            .doOnError { Timber.e(it) }
-            .retry()
-            .subscribe()
+            .subscribe(::search)
             .untilDestroy()
 
         cityChanged.observable
             .subscribe { sendNavigationMessage(CityChanged(tag, it)) }
             .untilDestroy()
+    }
+
+    private fun search(query: String) {
+        searchDisposable?.dispose()
+        findCitiesByNameInteractor.execute(query)
+            .bindProgress(progress.consumer)
+            .doOnSuccess(cities.consumer)
+            .doOnError { Timber.e(it) }
+            .retry()
+            .subscribe()
+            .untilSearch()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        searchDisposable?.dispose()
+        searchDisposable = null
+    }
+
+    private fun Disposable.untilSearch() {
+        searchDisposable = this
     }
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.support.v7.widget.navigationClicks
+import com.jakewharton.rxbinding2.view.visibility
 import kotlinx.android.synthetic.main.screen_change_city.*
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.exchangerates.extensions.showKeyboard
@@ -49,6 +50,7 @@ class ChangeCityScreen : Screen<ChangeCityPm>() {
     override fun onBindPresentationModel(pm: ChangeCityPm) {
         pm.input bindTo input
         pm.cities bindTo citiesAdapter::setItems
+        pm.progress bindTo progress.visibility()
 
         toolbar.navigationClicks() bindTo pm.backAction
     }

@@ -17,13 +17,25 @@
         android:elevation="4dp"
         app:navigationIcon="@drawable/ic_back">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/input"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@color/black_transparent"
-            android:gravity="center_vertical"
-            android:hint="@string/screen_change_city_name"/>
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@color/black_transparent"
+                android:gravity="center_vertical"
+                android:hint="@string/screen_change_city_name"/>
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="@dimen/normal_gap"/>
+        </FrameLayout>
     </androidx.appcompat.widget.Toolbar>
 
 

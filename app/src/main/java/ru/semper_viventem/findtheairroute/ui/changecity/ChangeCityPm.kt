@@ -18,13 +18,15 @@ class ChangeCityPm(
 
     val input = inputControl()
     val cities = State<List<City>>()
+    val progress = State(false)
+    val errorMessage = State<Int>()
     val cityChanged = Action<City>()
 
     override fun onCreate() {
         super.onCreate()
 
         input.textChanges.observable
-            .filter { it.length < MIN_INPUT_SYMBOLS }
+            .filter { it.length >= MIN_INPUT_SYMBOLS }
             .flatMapSingle { query ->
                 findCitiesByNameInteractor.execute(query)
             }

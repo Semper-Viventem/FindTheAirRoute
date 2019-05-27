@@ -4,6 +4,7 @@ import com.jakewharton.rxbinding2.view.clicks
 import kotlinx.android.synthetic.main.screen_home.*
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.findtheairroute.R
+import ru.semper_viventem.findtheairroute.domain.City
 import ru.semper_viventem.findtheairroute.ui.common.Screen
 
 class HomeScreen : Screen<HomePm>() {
@@ -22,5 +23,9 @@ class HomeScreen : Screen<HomePm>() {
         pm.searchButtonEnabled bindTo searchButton::setEnabled
         fromEdit.clicks() bindTo pm.fromCityClicks
         toEdit.clicks() bindTo pm.toCityClicks
+    }
+
+    fun onCityChanged(tag: String, city: City) {
+        tag to city passTo presentationModel.cityChanged
     }
 }

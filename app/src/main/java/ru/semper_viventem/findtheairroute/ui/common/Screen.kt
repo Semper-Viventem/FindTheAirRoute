@@ -6,13 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import me.dmdev.rxpm.base.PmSupportFragment
 
-abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM> {
-
-    constructor() : super()
-
-    constructor(args: Bundle) : super() {
-        arguments = args
-    }
+abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM>() {
 
     abstract val layoutRes: Int
 

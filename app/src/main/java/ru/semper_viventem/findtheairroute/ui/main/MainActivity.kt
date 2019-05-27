@@ -10,6 +10,7 @@ import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.exchangerates.extensions.hideKeyboard
 import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.ui.Back
+import ru.semper_viventem.findtheairroute.ui.CityChanged
 import ru.semper_viventem.findtheairroute.ui.OpenChangeCityScreen
 import ru.semper_viventem.findtheairroute.ui.OpenHomeScreen
 import ru.semper_viventem.findtheairroute.ui.changecity.ChangeCityScreen
@@ -25,8 +26,6 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        handleNavigationMessage(OpenHomeScreen())
     }
 
     override fun onBindPresentationModel(pm: MainPm) {
@@ -40,6 +39,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
             is Back -> back()
             is OpenHomeScreen -> setRootScreen(HomeScreen())
             is OpenChangeCityScreen -> openScreen(ChangeCityScreen.newInstance(message.tag))
+            is CityChanged -> backTo<HomeScreen>()?.onCityChanged(message.tag, message.city)
         }
         return true
     }
@@ -48,7 +48,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
         supportFragmentManager
             .beginTransaction()
             .add(containerId, screen)
-            .addToBackStack(null)
+            .addToBackStack(screen::class.java.canonicalName)
             .commit()
     }
 
@@ -67,5 +67,10 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
 
     private fun back() {
         if (!supportFragmentManager.popBackStackImmediate()) finish()
+    }
+
+    private inline fun <reified T : Fragment> backTo(): T? {
+        supportFragmentManager.popBackStack()
+        return supportFragmentManager.fragments.firstOrNull() as? T
     }
 }

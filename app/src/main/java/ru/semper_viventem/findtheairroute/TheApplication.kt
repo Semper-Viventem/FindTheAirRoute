@@ -5,7 +5,8 @@ import com.facebook.stetho.Stetho
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
-import ru.semper_viventem.findtheairroute.data.GatewayModule
+import ru.semper_viventem.findtheairroute.data.gateway.GatewayModule
+import ru.semper_viventem.findtheairroute.data.network.NetworkModule
 import ru.semper_viventem.findtheairroute.domain.InteractorModule
 import ru.semper_viventem.findtheairroute.ui.UIModule
 import timber.log.Timber
@@ -27,7 +28,8 @@ class TheApplication : Application() {
             modules(
                 UIModule.module,
                 GatewayModule.module,
-                InteractorModule.module
+                InteractorModule.module,
+                NetworkModule.module
             )
         }
     }

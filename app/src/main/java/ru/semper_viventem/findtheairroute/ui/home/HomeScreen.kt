@@ -15,10 +15,10 @@ class HomeScreen : Screen<HomePm>() {
 
     override fun onBindPresentationModel(pm: HomePm) {
         pm.fromCity bindTo { cityValue ->
-            fromInput.editText?.setText(cityValue.city?.cityName.orEmpty())
+            fromInput.editText?.setText(cityValue.city?.fullName.orEmpty())
         }
         pm.toCity bindTo { cityValue ->
-            toInput.editText?.setText(cityValue.city?.cityName.orEmpty())
+            toInput.editText?.setText(cityValue.city?.fullName.orEmpty())
         }
         pm.searchButtonEnabled bindTo searchButton::setEnabled
 

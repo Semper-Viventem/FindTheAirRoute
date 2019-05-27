@@ -34,13 +34,13 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
     }
 
     override fun handleNavigationMessage(message: NavigationMessage): Boolean {
+        container.hideKeyboard()
+
         when (message) {
             is Back -> back()
             is OpenHomeScreen -> setRootScreen(HomeScreen())
             is OpenChangeCityScreen -> openScreen(ChangeCityScreen.newInstance(message.tag))
         }
-
-        container.hideKeyboard()
         return true
     }
 

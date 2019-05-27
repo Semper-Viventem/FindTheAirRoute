@@ -6,5 +6,5 @@ import ru.semper_viventem.findtheairroute.domain.City
 class Back() : NavigationMessage
 class OpenHomeScreen : NavigationMessage
 class OpenChangeCityScreen(val tag: String) : NavigationMessage
-class ScreenChanged(val tag: String, val city: City) : NavigationMessage
+class CityChanged(val tag: String, val city: City) : NavigationMessage
 class OpenMap(val from: City, val to: City) : NavigationMessage

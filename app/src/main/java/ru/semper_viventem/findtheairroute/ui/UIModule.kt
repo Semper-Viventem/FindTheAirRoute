@@ -6,9 +6,12 @@ import ru.semper_viventem.findtheairroute.ui.home.HomePm
 import ru.semper_viventem.findtheairroute.ui.main.MainPm
 
 object UIModule {
+
+    const val PROPERTY_TAG = "property_tag"
+
     val module = module {
         factory { MainPm() }
         factory { HomePm() }
-        factory { ChangeCityPm() }
+        factory { ChangeCityPm(getProperty(PROPERTY_TAG), get()) }
     }
 }

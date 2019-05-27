@@ -5,7 +5,7 @@ import io.reactivex.Single
 class FindCitiesByNameInteractor {
 
     // TODO implement it
-    fun execute(): Single<List<City>> {
+    fun execute(query: String): Single<List<City>> {
         return Single.just(
             (0..10).map {
                 City(

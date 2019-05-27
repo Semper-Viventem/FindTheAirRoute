@@ -25,6 +25,8 @@
                 android:id="@+id/input"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:textColor="@color/textColorWhite"
+                android:textColorHint="@color/textColorWhiteSecondary"
                 android:background="@color/black_transparent"
                 android:gravity="center_vertical"
                 android:hint="@string/screen_change_city_name"/>

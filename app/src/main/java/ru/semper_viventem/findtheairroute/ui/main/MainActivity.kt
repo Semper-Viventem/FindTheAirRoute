@@ -2,10 +2,12 @@ package ru.semper_viventem.findtheairroute.ui.main
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.activity_main.*
 import me.dmdev.rxpm.base.PmSupportActivity
 import me.dmdev.rxpm.navigation.NavigationMessage
 import me.dmdev.rxpm.navigation.NavigationMessageHandler
 import org.koin.android.ext.android.getKoin
+import ru.semper_viventem.exchangerates.extensions.hideKeyboard
 import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.ui.OpenHomeScreen
 import ru.semper_viventem.findtheairroute.ui.home.HomeScreen
@@ -32,6 +34,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
             is OpenHomeScreen -> setRootScreen(HomeScreen())
         }
 
+        container.hideKeyboard()
         return true
     }
 

@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputFrom"
+        android:id="@+id/fromInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/normal_gap"
@@ -18,13 +18,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/fromEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"/>
+            android:clickable="true"
+            android:editable="false"
+            android:focusable="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputTo"
+        android:id="@+id/toInput"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/normal_gap"
@@ -33,12 +36,15 @@
         android:hint="@string/to"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/inputFrom">
+        app:layout_constraintTop_toBottomOf="@id/fromInput">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/toEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"/>
+            android:clickable="true"
+            android:editable="false"
+            android:focusable="true"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -51,5 +57,5 @@
         android:text="@string/go"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/inputTo"/>
+        app:layout_constraintTop_toBottomOf="@id/toInput"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

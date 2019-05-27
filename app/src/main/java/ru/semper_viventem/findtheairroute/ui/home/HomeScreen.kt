@@ -6,7 +6,7 @@ import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.ui.common.Screen
 
-class HomeScreen: Screen<HomePm>() {
+class HomeScreen : Screen<HomePm>() {
 
     override val layoutRes: Int = R.layout.screen_home
 
@@ -14,13 +14,13 @@ class HomeScreen: Screen<HomePm>() {
 
     override fun onBindPresentationModel(pm: HomePm) {
         pm.fromCity bindTo { cityValue ->
-            inputFrom.editText?.setText(cityValue.city?.cityName.orEmpty())
+            fromInput.editText?.setText(cityValue.city?.cityName.orEmpty())
         }
         pm.toCity bindTo { cityValue ->
-            inputTo.editText?.setText(cityValue.city?.cityName.orEmpty())
+            toInput.editText?.setText(cityValue.city?.cityName.orEmpty())
         }
         pm.searchButtonEnabled bindTo searchButton::setEnabled
-        inputFrom.clicks() bindTo pm.fromCityClicks
-        inputTo.clicks() bindTo pm.toCityClicks
+        fromEdit.clicks() bindTo pm.fromCityClicks
+        toEdit.clicks() bindTo pm.toCityClicks
     }
 }

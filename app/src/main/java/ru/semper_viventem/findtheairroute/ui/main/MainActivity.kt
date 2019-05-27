@@ -9,7 +9,11 @@ import me.dmdev.rxpm.navigation.NavigationMessageHandler
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.exchangerates.extensions.hideKeyboard
 import ru.semper_viventem.findtheairroute.R
+import ru.semper_viventem.findtheairroute.ui.Back
+import ru.semper_viventem.findtheairroute.ui.OpenChangeCityScreen
 import ru.semper_viventem.findtheairroute.ui.OpenHomeScreen
+import ru.semper_viventem.findtheairroute.ui.changecity.ChangeCityScreen
+import ru.semper_viventem.findtheairroute.ui.common.Screen
 import ru.semper_viventem.findtheairroute.ui.home.HomeScreen
 
 class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
@@ -30,24 +34,28 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
     }
 
     override fun handleNavigationMessage(message: NavigationMessage): Boolean {
-        when(message) {
+        when (message) {
+            is Back -> back()
             is OpenHomeScreen -> setRootScreen(HomeScreen())
+            is OpenChangeCityScreen -> openScreen(ChangeCityScreen.newInstance(message.tag))
         }
 
         container.hideKeyboard()
         return true
     }
 
-    private fun openScreen(screen: Fragment, addToBackStack: Boolean = true) {
+    private fun openScreen(screen: Fragment) {
         supportFragmentManager
             .beginTransaction()
             .add(containerId, screen)
-            .apply {
-                if (addToBackStack) {
-                    addToBackStack(null)
-                }
-            }
+            .addToBackStack(null)
             .commit()
+    }
+
+    override fun onBackPressed() {
+        if ((supportFragmentManager.fragments.firstOrNull() as? Screen<*>)?.handleBack()?.not() == true) {
+            super.onBackPressed()
+        }
     }
 
     private fun setRootScreen(screen: Fragment) {
@@ -55,5 +63,9 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
             .beginTransaction()
             .replace(containerId, screen)
             .commit()
+    }
+
+    private fun back() {
+        if (!supportFragmentManager.popBackStackImmediate()) finish()
     }
 }

@@ -29,7 +29,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
 
     override fun handleNavigationMessage(message: NavigationMessage): Boolean {
         when(message) {
-            is OpenHomeScreen -> setRoot(HomeScreen())
+            is OpenHomeScreen -> setRootScreen(HomeScreen())
         }
 
         return true
@@ -47,7 +47,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
             .commit()
     }
 
-    private fun setRoot(screen: Fragment) {
+    private fun setRootScreen(screen: Fragment) {
         supportFragmentManager
             .beginTransaction()
             .replace(containerId, screen)

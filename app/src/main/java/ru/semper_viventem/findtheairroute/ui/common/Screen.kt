@@ -16,7 +16,7 @@ abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM>(), BackHandler {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        onInitView(view)
+        onInitView(view, savedInstanceState)
     }
 
     override fun handleBack(): Boolean {
@@ -24,7 +24,7 @@ abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM>(), BackHandler {
         return true
     }
 
-    open fun onInitView(view: View) {
+    open fun onInitView(view: View, savedInstanceState: Bundle?) {
         // do nothing
     }
 }

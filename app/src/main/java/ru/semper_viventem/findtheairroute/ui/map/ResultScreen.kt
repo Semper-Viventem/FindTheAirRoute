@@ -1,13 +1,12 @@
 package ru.semper_viventem.findtheairroute.ui.map
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.screen_result.view.*
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.findtheairroute.R
@@ -61,6 +60,8 @@ class ResultScreen : MapScreen<ResultPm>() {
 
             val cameraOffset = resources.getDimensionPixelOffset(R.dimen.normal_gap)
             googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, cameraOffset))
+
+            drawRoute(googleMap, fromCity.location.toLatLng(), toCity.location.toLatLng())
         }
     }
 
@@ -70,5 +71,18 @@ class ResultScreen : MapScreen<ResultPm>() {
             .title(title)
 
         return map.addMarker(marker)
+    }
+
+    private fun drawRoute(map: GoogleMap, from: LatLng, to: LatLng) {
+        val strokeWidth = resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
+        val strokeInterval = resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
+        val poline = PolylineOptions()
+            .add(from, to)
+            .width(strokeWidth)
+            .color(Color.GRAY)
+            .geodesic(true)
+            .pattern(listOf(Gap(strokeInterval), Dash(strokeInterval)))
+
+        map.addPolyline(poline)
     }
 }

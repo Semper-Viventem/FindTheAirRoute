@@ -1,5 +1,6 @@
 package ru.semper_viventem.findtheairroute.ui.home
 
+import com.jakewharton.rxbinding2.view.clicks
 import com.jakewharton.rxbinding2.view.focusChanges
 import kotlinx.android.synthetic.main.screen_home.*
 import org.koin.android.ext.android.getKoin
@@ -22,6 +23,7 @@ class HomeScreen : Screen<HomePm>() {
         }
         pm.searchButtonEnabled bindTo searchButton::setEnabled
 
+        searchButton.clicks() bindTo pm.searchButtonClicks
         fromEdit.focusChanges()
             .filter { it }
             .map { Unit }

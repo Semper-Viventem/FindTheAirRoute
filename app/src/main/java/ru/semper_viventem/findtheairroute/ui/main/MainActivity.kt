@@ -9,13 +9,11 @@ import me.dmdev.rxpm.navigation.NavigationMessageHandler
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.exchangerates.extensions.hideKeyboard
 import ru.semper_viventem.findtheairroute.R
-import ru.semper_viventem.findtheairroute.ui.Back
-import ru.semper_viventem.findtheairroute.ui.CityChanged
-import ru.semper_viventem.findtheairroute.ui.OpenChangeCityScreen
-import ru.semper_viventem.findtheairroute.ui.OpenHomeScreen
+import ru.semper_viventem.findtheairroute.ui.*
 import ru.semper_viventem.findtheairroute.ui.changecity.ChangeCityScreen
-import ru.semper_viventem.findtheairroute.ui.common.Screen
+import ru.semper_viventem.findtheairroute.ui.common.BackHandler
 import ru.semper_viventem.findtheairroute.ui.home.HomeScreen
+import ru.semper_viventem.findtheairroute.ui.map.ResultScreen
 
 class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
 
@@ -40,6 +38,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
             is OpenHomeScreen -> setRootScreen(HomeScreen())
             is OpenChangeCityScreen -> openScreen(ChangeCityScreen.newInstance(message.tag), R.anim.slide_in_bottom, R.anim.slide_out_bottom)
             is CityChanged -> backTo<HomeScreen>()?.onCityChanged(message.tag, message.city)
+            is OpenMap -> openScreen(ResultScreen.newInstance(message.from, message.to))
         }
         return true
     }
@@ -54,7 +53,7 @@ class MainActivity : PmSupportActivity<MainPm>(), NavigationMessageHandler {
     }
 
     override fun onBackPressed() {
-        if ((supportFragmentManager.fragments.firstOrNull() as? Screen<*>)?.handleBack()?.not() == true) {
+        if ((supportFragmentManager.fragments.firstOrNull() as? BackHandler)?.handleBack()?.not() == true) {
             super.onBackPressed()
         }
     }

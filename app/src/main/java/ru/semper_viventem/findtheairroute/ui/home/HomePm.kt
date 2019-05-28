@@ -2,8 +2,10 @@ package ru.semper_viventem.findtheairroute.ui.home
 
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction
+import io.reactivex.rxkotlin.withLatestFrom
 import ru.semper_viventem.findtheairroute.domain.City
 import ru.semper_viventem.findtheairroute.ui.OpenChangeCityScreen
+import ru.semper_viventem.findtheairroute.ui.OpenMap
 import ru.semper_viventem.findtheairroute.ui.common.ScreenPm
 
 class HomePm : ScreenPm() {
@@ -23,6 +25,7 @@ class HomePm : ScreenPm() {
 
     val fromCityClicks = Action<Unit>()
     val toCityClicks = Action<Unit>()
+    val searchButtonClicks = Action<Unit>()
 
     /**
      * Pair with tag and changed city
@@ -57,6 +60,17 @@ class HomePm : ScreenPm() {
             }
         )
             .subscribe(searchButtonEnabled.consumer)
+            .untilDestroy()
+
+        searchButtonClicks.observable
+            .withLatestFrom(
+                fromCity.observable,
+                toCity.observable
+            ) { _, fromCityValue, toCityValue -> fromCityValue to toCityValue }
+            .filter { (fromCityValue, toCityValue) -> fromCityValue.city != null && toCityValue.city != null }
+            .subscribe { (fromCityValue, toCityValue) ->
+                sendNavigationMessage(OpenMap(fromCityValue.city!!, toCityValue.city!!))
+            }
             .untilDestroy()
     }
 }

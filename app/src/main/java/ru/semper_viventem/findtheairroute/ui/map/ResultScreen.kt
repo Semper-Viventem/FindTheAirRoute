@@ -47,7 +47,10 @@ class ResultScreen : MapScreen<ResultPm>() {
         .get()
 
     override fun onInitMap(googleMap: GoogleMap) {
-        // TODO
+        with(googleMap.uiSettings) {
+            isRotateGesturesEnabled = false
+            isTiltGesturesEnabled = false
+        }
     }
 
     override fun onBindPresentationModel(view: View, pm: ResultPm) {
@@ -88,7 +91,6 @@ class ResultScreen : MapScreen<ResultPm>() {
             .width(strokeWidth)
             .jointType(JointType.ROUND)
             .color(Color.GRAY)
-            .geodesic(true)
             .pattern(listOf(Gap(strokeInterval), Dash(strokeInterval)))
 
         return map.addPolyline(polyline)

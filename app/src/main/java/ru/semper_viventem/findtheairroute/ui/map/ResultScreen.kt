@@ -101,6 +101,7 @@ class ResultScreen : MapScreen<ResultPm>() {
 
         val airplane = map.addMarker(
             MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_plane))
                 .position(points.first())
                 .anchor(0.5F, 0.5F)
         )
@@ -163,14 +164,16 @@ class ResultScreen : MapScreen<ResultPm>() {
         val lat = Math.abs(begin.latitude - end.latitude)
         val lng = Math.abs(begin.longitude - end.longitude)
 
-        if (begin.latitude < end.latitude && begin.longitude < end.longitude)
-            return Math.toDegrees(Math.atan(lng / lat)).toFloat()
-        else if (begin.latitude >= end.latitude && begin.longitude < end.longitude)
-            return (90 - Math.toDegrees(Math.atan(lng / lat)) + 90).toFloat()
-        else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude)
-            return (Math.toDegrees(Math.atan(lng / lat)) + 180).toFloat()
-        else if (begin.latitude < end.latitude && begin.longitude >= end.longitude)
-            return (90 - Math.toDegrees(Math.atan(lng / lat)) + 270).toFloat()
-        return -1f
+        val bearing = if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
+            Math.toDegrees(Math.atan(lng / lat)).toFloat()
+        } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
+            (90 - Math.toDegrees(Math.atan(lng / lat)) + 90).toFloat()
+        } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
+            (Math.toDegrees(Math.atan(lng / lat)) + 180).toFloat()
+        } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
+            (90 - Math.toDegrees(Math.atan(lng / lat)) + 270).toFloat()
+        } else 0F
+
+        return bearing - 90
     }
 }

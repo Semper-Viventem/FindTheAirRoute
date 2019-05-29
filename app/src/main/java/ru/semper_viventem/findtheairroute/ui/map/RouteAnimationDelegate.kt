@@ -8,6 +8,7 @@ import androidx.core.animation.addListener
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import ru.semper_viventem.findtheairroute.R
+import ru.semper_viventem.findtheairroute.extensions.distanceTo
 import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
 
 class RouteAnimationDelegate(
@@ -61,12 +62,12 @@ class RouteAnimationDelegate(
                 .anchor(0.5F, 0.5F)
         )
 
-        val intervalDuration = animationDuration / points.count()
+        val intervalDuration = getIntervalsDuration(points, animationDuration)
 
         animateNextInterval(airplane, points, intervalDuration, 0, false)
     }
 
-    private fun animateNextInterval(airplane: Marker, points: List<LatLng>, intervalDuration: Long, intervalNumber: Int, isReverse: Boolean) {
+    private fun animateNextInterval(airplane: Marker, points: List<LatLng>, intervalsDuration: List<Long>, intervalNumber: Int, isReverse: Boolean) {
 
         airplaneAnimator?.cancel()
         airplaneAnimator = null
@@ -78,17 +79,18 @@ class RouteAnimationDelegate(
             isReverse
         }
         val nextIntervalNumber = if (nextIsReverse) intervalNumber - 1 else intervalNumber + 1
+        val durationInterval = if (intervalNumber == points.lastIndex) intervalsDuration[intervalNumber - 1] else intervalsDuration[intervalNumber]
 
         val currentPosition = points[intervalNumber]
         val nextPosition = points[nextIntervalNumber]
 
         airplaneAnimator = ValueAnimator.ofFloat(0F, 1F).apply {
-            duration = intervalDuration
+            duration = durationInterval
             addUpdateListener {
                 handleTact(airplane, currentPosition, nextPosition, it.animatedValue as Float)
             }
             addListener(onEnd = {
-                animateNextInterval(airplane, points, intervalDuration, nextIntervalNumber, nextIsReverse)
+                animateNextInterval(airplane, points, intervalsDuration, nextIntervalNumber, nextIsReverse)
             })
             start()
         }
@@ -117,6 +119,26 @@ class RouteAnimationDelegate(
         } else 0F
 
         return bearing - 90
+    }
+
+    private fun getIntervalsDuration(points: List<LatLng>, fullDuration: Long): List<Long> {
+        val distancies = mutableListOf<Float>()
+        points.forEachIndexed { index, latLng ->
+            if (index != points.lastIndex) {
+                distancies.add(latLng.distanceTo(points[index + 1]))
+            }
+        }
+
+        val total = distancies.sum()
+
+        val result = mutableListOf<Long>()
+
+        distancies.forEach { part ->
+            val weight = fullDuration / total * part
+            result.add(weight.toLong())
+        }
+
+        return result
     }
 
     private fun getBezierCurvePoints(from: LatLng, to: LatLng): List<LatLng> {

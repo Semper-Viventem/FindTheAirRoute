@@ -2,6 +2,7 @@ package ru.semper_viventem.findtheairroute.ui.changecity
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.support.v7.widget.navigationClicks
 import com.jakewharton.rxbinding2.view.visibility
@@ -51,6 +52,12 @@ class ChangeCityScreen : Screen<ChangeCityPm>() {
         pm.input bindTo input
         pm.cities bindTo citiesAdapter::setItems
         pm.progress bindTo progress.visibility()
+        pm.errorDialog bindTo { messageRes, dc ->
+            AlertDialog.Builder(context!!)
+                .setMessage(messageRes)
+                .setPositiveButton(R.string.cancel, null)
+                .create()
+        }
 
         toolbar.navigationClicks() bindTo pm.backAction
     }

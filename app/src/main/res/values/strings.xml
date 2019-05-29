@@ -4,4 +4,7 @@
     <string name="to">To</string>
     <string name="go">Go</string>
     <string name="screen_change_city_name">Name</string>
+    <string name="error_no_internet_connection">No internet connection</string>
+    <string name="error_loading">Loading error</string>
+    <string name="cancel">cancel</string>
 </resources>

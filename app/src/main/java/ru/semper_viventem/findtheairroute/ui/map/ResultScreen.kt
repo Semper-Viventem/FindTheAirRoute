@@ -5,6 +5,7 @@ import android.view.View
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -98,6 +99,7 @@ class ResultScreen : MapScreen<ResultPm>() {
     private fun addMarker(map: GoogleMap, location: Location, title: String): Marker {
         val marker = MarkerOptions()
             .position(location.toLatLng())
+            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
             .title(title)
 
         return map.addMarker(marker)

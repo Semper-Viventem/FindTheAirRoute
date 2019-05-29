@@ -18,6 +18,7 @@ import ru.semper_viventem.findtheairroute.domain.Location
 import ru.semper_viventem.findtheairroute.extensions.distanceTo
 import ru.semper_viventem.findtheairroute.extensions.toLatLng
 import ru.semper_viventem.findtheairroute.ui.UIModule
+import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
 import ru.semper_viventem.findtheairroute.ui.common.MapScreen
 
 
@@ -87,7 +88,7 @@ class ResultScreen : MapScreen<ResultPm>() {
         val strokeWidth = resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
         val strokeInterval = resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
         val polyline = PolylineOptions()
-            .add(from, LatLng(0.0, 0.0), to)
+            .add(*getBezierCurvePoints(from, to).toTypedArray())
             .width(strokeWidth)
             .jointType(JointType.ROUND)
             .color(Color.GRAY)
@@ -175,5 +176,16 @@ class ResultScreen : MapScreen<ResultPm>() {
         } else 0F
 
         return bearing - 90
+    }
+
+    private fun getBezierCurvePoints(from: LatLng, to: LatLng): List<LatLng> {
+        val points = mutableListOf<LatLng>()
+        val interpolator = LatLngBezierInterpolator(from, to)
+        var t = 0.0
+        while (t < 1.000001) {
+            points.add(interpolator.interpolate(t))
+            t += 0.01F
+        }
+        return points
     }
 }

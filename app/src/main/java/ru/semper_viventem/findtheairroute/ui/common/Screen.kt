@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import me.dmdev.rxpm.base.PmSupportFragment
 
-abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM>() {
+abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM>(), BackHandler {
 
     abstract val layoutRes: Int
 
@@ -16,15 +16,15 @@ abstract class Screen<PM : ScreenPm> : PmSupportFragment<PM>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        onInitView(view)
+        onInitView(view, savedInstanceState)
     }
 
-    open fun handleBack(): Boolean {
+    override fun handleBack(): Boolean {
         passTo(presentationModel.backAction.consumer)
         return true
     }
 
-    open fun onInitView(view: View) {
+    open fun onInitView(view: View, savedInstanceState: Bundle?) {
         // do nothing
     }
 }

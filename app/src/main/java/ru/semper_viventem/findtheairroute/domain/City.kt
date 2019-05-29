@@ -1,6 +1,7 @@
 package ru.semper_viventem.findtheairroute.domain
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class City(
     @SerializedName("id") val id: Int,
@@ -8,4 +9,4 @@ data class City(
     @SerializedName("country") val countryName: String,
     @SerializedName("fullname") val fullName: String,
     @SerializedName("location") val location: Location
-)
+): Serializable

@@ -2,6 +2,7 @@ package ru.semper_viventem.findtheairroute
 
 import android.app.Application
 import com.facebook.stetho.Stetho
+import com.google.android.gms.maps.MapsInitializer
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -19,6 +20,11 @@ class TheApplication : Application() {
         initDI()
         initLog()
         initStetho()
+        initMaps()
+    }
+
+    private fun initMaps() {
+        MapsInitializer.initialize(this)
     }
 
     private fun initDI() {

@@ -29,8 +29,8 @@ class ChangeCityScreen : Screen<ChangeCityPm>() {
         city passTo presentationModel.cityChanged
     }
 
-    override fun onInitView(view: View) {
-        super.onInitView(view)
+    override fun onInitView(view: View, savedInstanceState: Bundle?) {
+        super.onInitView(view, savedInstanceState)
 
         with(recyclerView) {
             layoutManager = LinearLayoutManager(context)

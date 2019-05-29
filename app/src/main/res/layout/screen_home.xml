@@ -6,50 +6,56 @@
     android:layout_height="match_parent"
     android:background="@color/windowBackground">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/fromInput"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/normal_gap"
         android:layout_marginStart="@dimen/normal_gap"
         android:layout_marginTop="@dimen/normal_gap"
-        android:hint="@string/from"
-        app:boxBackgroundColor="@color/fieldsBackground"
-        app:boxCornerRadiusTopEnd="@dimen/field_radius"
-        app:boxCornerRadiusTopStart="@dimen/field_radius"
-        app:layout_constraintBottom_toTopOf="@id/toInput"
+        app:cardCornerRadius="@dimen/field_radius"
+        app:layout_constraintBottom_toTopOf="@id/searchButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/fromEdit"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/toInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/normal_gap"
-        android:layout_marginStart="@dimen/normal_gap"
-        android:layout_marginTop="@dimen/normal_gap"
-        android:hint="@string/to"
-        app:boxBackgroundColor="@color/fieldsBackground"
-        app:boxCornerRadiusTopEnd="@dimen/field_radius"
-        app:boxCornerRadiusTopStart="@dimen/field_radius"
-        app:layout_constraintBottom_toTopOf="@id/searchButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fromInput">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/fromButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:hint="@string/from"
+                android:paddingEnd="@dimen/normal_gap"
+                android:paddingStart="@dimen/normal_gap"
+                android:textAlignment="textStart"
+                android:textAllCaps="false"
+                android:textColor="?android:textColorPrimary"
+                android:textColorHint="?android:textColorSecondary"
+                app:icon="@drawable/ic_location"
+                app:iconPadding="@dimen/normal_gap"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/toEdit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:hint="@string/to"
+                android:paddingEnd="@dimen/normal_gap"
+                android:paddingStart="@dimen/normal_gap"
+                android:textAlignment="textStart"
+                android:textAllCaps="false"
+                android:textColor="?android:textColorPrimary"
+                android:textColorHint="?android:textColorSecondary"
+                app:icon="@drawable/ic_location"
+                app:iconPadding="@dimen/normal_gap"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/searchButton"
@@ -64,5 +70,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toInput"/>
+        app:layout_constraintTop_toBottomOf="@id/searchView"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

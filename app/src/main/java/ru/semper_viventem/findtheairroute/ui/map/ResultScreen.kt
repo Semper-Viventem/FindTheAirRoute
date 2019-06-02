@@ -76,8 +76,8 @@ class ResultScreen : MapScreen<ResultPm>() {
 
     override fun onBindMapPresentationModel(pm: ResultPm, googleMap: GoogleMap) {
         pm.points bindTo { (fromCity, toCity) ->
-            val markerFrom = addMarker(googleMap, fromCity.location, fromCity.cityName)
-            val markerTo = addMarker(googleMap, toCity.location, toCity.cityName)
+            val markerFrom = addMarker(googleMap, fromCity.location, fromCity.getShortName())
+            val markerTo = addMarker(googleMap, toCity.location, toCity.getShortName())
 
             val bounds = LatLngBounds.Builder()
                 .include(markerFrom.position)

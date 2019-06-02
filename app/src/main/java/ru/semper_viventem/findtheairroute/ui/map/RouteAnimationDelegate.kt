@@ -92,7 +92,8 @@ class RouteAnimationDelegate(
                 airplane.position = nextPosition
             }
             addListener(onEnd = {
-                startAnimation(airplane, end, begin)
+
+                startAnimation(airplane, end, 1 - end)
             })
             start()
         }

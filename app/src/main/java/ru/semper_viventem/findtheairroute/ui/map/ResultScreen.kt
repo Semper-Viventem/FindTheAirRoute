@@ -97,27 +97,17 @@ class ResultScreen : MapScreen<ResultPm>() {
         val marker = MarkerOptions()
             .position(location.toLatLng())
             .icon(getCityMarker(title))
-            .title(title)
             .flat(true)
             .anchor(0.5F, 0.5F)
 
         return map.addMarker(marker)
     }
 
-    fun getCityMarker(name: String): BitmapDescriptor {
-        val drawable = ChipDrawable.createFromResource(context, R.xml.city_chip_drawable).apply {
-            setChipStrokeColorResource(R.color.white)
-            chipStrokeWidth = context!!.resources.getDimensionPixelOffset(R.dimen.chip_stroke_width).toFloat()
+    private fun getCityMarker(name: String): BitmapDescriptor {
+        val drawable = ChipDrawable.createFromResource(context, R.xml.city_chip_drawable)
+        drawable.setText(name)
 
-            setChipBackgroundColorResource(R.color.chip_color)
-            setTextAppearanceResource(R.style.ChipTextStyle)
-
-            isCloseIconVisible = false
-            isCheckedIconVisible = false
-            this.setText(name)
-        }
-
-        val bitmap = drawable.toBitmap(200, 100, Bitmap.Config.ARGB_8888)
+        val bitmap = drawable.toBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
 
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }

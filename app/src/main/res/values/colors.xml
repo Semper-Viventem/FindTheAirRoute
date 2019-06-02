@@ -7,7 +7,7 @@
     <color name="windowBackground">#ede7f6</color>
     <color name="buttonDisabled">#b39ddb</color>
     <color name="fieldsBackground">@color/white</color>
-    <color name="chip_color">#AAFFEB3B</color>
+    <color name="chip_color">#DAC200</color>
 
     <color name="textColorWhite">@color/white</color>
     <color name="textColorWhiteSecondary">@color/white_translucent_50</color>

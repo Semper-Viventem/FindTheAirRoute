@@ -8,18 +8,35 @@ class ResultPm(
     private val toCity: City
 ) : MapScreenPm() {
 
+    data class ScreenState(
+        val from: City,
+        val to: City,
+        val startPosition: Float,
+        val endPosition: Float
+    )
+
     /**
      * Pair with [fromCity] and [toCity]
      */
-    val points = State<Pair<City, City>>()
+    val state = State<ScreenState>()
+    private val animationProgress = State(0F to 1F)
+
+    /**
+     * Current animation value to and animation value
+     */
+    val saveProgress = Action<Pair<Float, Float>>()
 
     override fun onCreate() {
         super.onCreate()
 
         mapReady.observable
             .filter { it }
-            .map { fromCity to toCity }
-            .subscribe(points.consumer)
+            .map { ScreenState(fromCity, toCity, animationProgress.value.first, animationProgress.value.second) }
+            .subscribe(state.consumer)
+            .untilDestroy()
+
+        saveProgress.observable
+            .subscribe(animationProgress.consumer)
             .untilDestroy()
     }
 }

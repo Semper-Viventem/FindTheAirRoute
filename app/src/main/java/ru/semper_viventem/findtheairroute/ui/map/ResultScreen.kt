@@ -62,7 +62,12 @@ class ResultScreen : MapScreen<ResultPm>() {
     }
 
     override fun onDestroy() {
-        routeAnimationDelegate?.stop()
+        with(routeAnimationDelegate!!) {
+            val progress = animationPosition to animationEnd
+            progress passTo presentationModel.saveProgress
+            stop()
+        }
+        routeAnimationDelegate = null
         super.onDestroy()
     }
 
@@ -75,7 +80,10 @@ class ResultScreen : MapScreen<ResultPm>() {
     }
 
     override fun onBindMapPresentationModel(pm: ResultPm, googleMap: GoogleMap) {
-        pm.points bindTo { (fromCity, toCity) ->
+        pm.state bindTo { state ->
+            val fromCity = state.from
+            val toCity = state.to
+
             val markerFrom = addMarker(googleMap, fromCity.location, fromCity.getShortName())
             val markerTo = addMarker(googleMap, toCity.location, toCity.getShortName())
 
@@ -88,7 +96,12 @@ class ResultScreen : MapScreen<ResultPm>() {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, cameraOffset))
 
             if (!routeAnimationDelegate!!.inProgress()) {
-                routeAnimationDelegate!!.start(googleMap, fromCity.location.toLatLng(), toCity.location.toLatLng())
+                routeAnimationDelegate!!.start(
+                    googleMap = googleMap,
+                    from = fromCity.location.toLatLng(),
+                    to = toCity.location.toLatLng(),
+                    begin = state.startPosition,
+                    end = state.endPosition)
             }
         }
     }

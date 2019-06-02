@@ -16,15 +16,22 @@ class RouteAnimationDelegate(
     private val animationDuration: Long
 ) {
 
+    companion object {
+        private const val START_ANIMATION = 0F
+        private const val END_ANIMATION = 1F
+    }
+
     private var airplaneAnimator: Animator? = null
     private var latLngInterpolator: LatLngBezierInterpolator? = null
+    var animationPosition: Float = START_ANIMATION
+    var animationEnd: Float = END_ANIMATION
 
-    fun start(googleMap: GoogleMap, from: LatLng, to: LatLng) {
+    fun start(googleMap: GoogleMap, from: LatLng, to: LatLng, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
         latLngInterpolator = LatLngBezierInterpolator(from, to)
 
         val polyline = drawRoute(googleMap)
         val airplane = drawAirplane(googleMap, polyline)
-        startAnimation(airplane)
+        startAnimation(airplane, begin, end)
     }
 
     fun resume() {
@@ -36,10 +43,8 @@ class RouteAnimationDelegate(
     }
 
     fun stop() {
-        airplaneAnimator?.end()
-        airplaneAnimator?.cancel()
+        killAnimation()
         latLngInterpolator = null
-        airplaneAnimator = null
     }
 
     fun inProgress() = airplaneAnimator?.isStarted == true
@@ -70,12 +75,17 @@ class RouteAnimationDelegate(
         )
     }
 
-    private fun startAnimation(airplane: Marker, begin: Float = 0F, end: Float = 1F) {
+    private fun startAnimation(airplane: Marker, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
+        animationEnd = end
 
+        killAnimation()
         airplaneAnimator = ValueAnimator.ofFloat(begin, end).apply {
             duration = animationDuration
             addUpdateListener {
                 val v = it.animatedValue as Float
+                animationPosition = v
+
+                if (latLngInterpolator == null) return@addUpdateListener
                 val nextPosition = latLngInterpolator!!.interpolate(v.toDouble())
 
                 airplane.rotation = getBearing(airplane.position, nextPosition)
@@ -86,6 +96,11 @@ class RouteAnimationDelegate(
             })
             start()
         }
+    }
+
+    private fun killAnimation() {
+        airplaneAnimator?.cancel()
+        airplaneAnimator = null
     }
 
     private fun getBearing(begin: LatLng, end: LatLng): Float {

@@ -2,17 +2,16 @@ package ru.semper_viventem.findtheairroute.ui.map
 
 import android.animation.Animator
 import android.animation.ValueAnimator
-import android.content.res.Resources
+import android.content.Context
 import android.graphics.Color
 import androidx.core.animation.addListener
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
 import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
-import timber.log.Timber
 
 class RouteAnimationDelegate(
-    private val resources: Resources,
+    private val context: Context,
     private val imageRes: Int,
     private val animationDuration: Long
 ) {
@@ -37,6 +36,7 @@ class RouteAnimationDelegate(
     }
 
     fun stop() {
+        airplaneAnimator?.end()
         airplaneAnimator?.cancel()
         latLngInterpolator = null
         airplaneAnimator = null
@@ -45,14 +45,14 @@ class RouteAnimationDelegate(
     fun inProgress() = airplaneAnimator?.isStarted == true
 
     private fun drawRoute(map: GoogleMap): Polyline {
-        val strokeWidth = resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
-        val strokeInterval = resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
+        val strokeWidth = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
+        val strokeInterval = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
         val polyline = PolylineOptions()
             .add(*getBezierCurvePoints().toTypedArray())
             .width(strokeWidth)
             .jointType(JointType.ROUND)
             .geodesic(true)
-            .color(Color.BLUE)
+            .color(Color.GRAY)
             .pattern(listOf(Gap(strokeInterval), Dot()))
 
         return map.addPolyline(polyline)
@@ -101,8 +101,6 @@ class RouteAnimationDelegate(
         } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
             (90 - Math.toDegrees(Math.atan(lng / lat)) + 270).toFloat()
         } else 0F
-
-        Timber.d("Bearing: lat [$lat], lng [$lng], angle [$bearing]")
 
         return bearing - 90
     }

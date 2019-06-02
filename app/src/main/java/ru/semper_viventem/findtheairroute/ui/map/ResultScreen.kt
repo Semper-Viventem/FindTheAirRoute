@@ -1,14 +1,14 @@
 package ru.semper_viventem.findtheairroute.ui.map
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
+import androidx.core.graphics.drawable.toBitmap
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
+import com.google.android.material.chip.ChipDrawable
 import kotlinx.android.synthetic.main.screen_result.view.*
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.findtheairroute.R
@@ -48,7 +48,7 @@ class ResultScreen : MapScreen<ResultPm>() {
 
     override fun onInitView(view: View, savedInstanceState: Bundle?) {
         super.onInitView(view, savedInstanceState)
-        routeAnimationDelegate = RouteAnimationDelegate(resources, R.drawable.ic_plane, AIRPLANE_ANIMATION_DURATION)
+        routeAnimationDelegate = RouteAnimationDelegate(context!!, R.drawable.ic_plane, AIRPLANE_ANIMATION_DURATION)
     }
 
     override fun onResume() {
@@ -96,9 +96,29 @@ class ResultScreen : MapScreen<ResultPm>() {
     private fun addMarker(map: GoogleMap, location: Location, title: String): Marker {
         val marker = MarkerOptions()
             .position(location.toLatLng())
-            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
+            .icon(getCityMarker(title))
             .title(title)
+            .flat(true)
+            .anchor(0.5F, 0.5F)
 
         return map.addMarker(marker)
+    }
+
+    fun getCityMarker(name: String): BitmapDescriptor {
+        val drawable = ChipDrawable.createFromResource(context, R.xml.city_chip_drawable).apply {
+            setChipStrokeColorResource(R.color.white)
+            chipStrokeWidth = context!!.resources.getDimensionPixelOffset(R.dimen.chip_stroke_width).toFloat()
+
+            setChipBackgroundColorResource(R.color.chip_color)
+            setTextAppearanceResource(R.style.ChipTextStyle)
+
+            isCloseIconVisible = false
+            isCheckedIconVisible = false
+            this.setText(name)
+        }
+
+        val bitmap = drawable.toBitmap(200, 100, Bitmap.Config.ARGB_8888)
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 }

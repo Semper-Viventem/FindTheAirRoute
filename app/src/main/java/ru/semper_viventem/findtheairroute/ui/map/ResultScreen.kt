@@ -67,10 +67,7 @@ class ResultScreen : MapScreen<ResultPm>() {
     }
 
     override fun onInitMap(googleMap: GoogleMap) {
-        with(googleMap.uiSettings) {
-            isRotateGesturesEnabled = false
-            isTiltGesturesEnabled = false
-        }
+        // do nothing
     }
 
     override fun onBindPresentationModel(view: View, pm: ResultPm) {

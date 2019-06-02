@@ -13,7 +13,7 @@ import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
 class RouteAnimationDelegate(
     private val context: Context,
     private val imageRes: Int,
-    private val animationDuration: Long
+    private val fullDuration: Long
 ) {
 
     companion object {
@@ -23,12 +23,14 @@ class RouteAnimationDelegate(
 
     private var airplaneAnimator: Animator? = null
     private var latLngInterpolator: LatLngBezierInterpolator? = null
+    private var airplaneDuration: Long = fullDuration
     var animationPosition: Float = START_ANIMATION
     var animationEnd: Float = END_ANIMATION
 
     fun start(googleMap: GoogleMap, from: LatLng, to: LatLng, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
         latLngInterpolator = LatLngBezierInterpolator(from, to)
 
+        airplaneDuration = (fullDuration - (fullDuration * begin)).toLong()
         val polyline = drawRoute(googleMap)
         val airplane = drawAirplane(googleMap, polyline)
         startAnimation(airplane, begin, end)
@@ -80,7 +82,7 @@ class RouteAnimationDelegate(
 
         killAnimation()
         airplaneAnimator = ValueAnimator.ofFloat(begin, end).apply {
-            duration = animationDuration
+            duration = airplaneDuration
             addUpdateListener {
                 val v = it.animatedValue as Float
                 animationPosition = v
@@ -92,7 +94,7 @@ class RouteAnimationDelegate(
                 airplane.position = nextPosition
             }
             addListener(onEnd = {
-
+                airplaneDuration = fullDuration
                 startAnimation(airplane, end, 1 - end)
             })
             start()

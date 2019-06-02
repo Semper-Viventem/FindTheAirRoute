@@ -42,11 +42,6 @@ abstract class MapScreen<PM> : Screen<PM>(), OnMapReadyCallback where PM : MapSc
 
     abstract fun onBindPresentationModel(view: View, pm: PM)
 
-    override fun handleBack(): Boolean {
-        passTo(presentationModel.backAction.consumer)
-        return true
-    }
-
     override fun onStart() {
         super.onStart()
         mapView?.onStart()

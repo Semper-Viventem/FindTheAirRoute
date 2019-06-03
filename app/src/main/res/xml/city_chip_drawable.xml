@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chip
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:textAppearance="@style/ChipTextStyle"
+    app:chipBackgroundColor="@color/chip_color"
+    app:chipStrokeWidth="@dimen/chip_stroke_width"
+    app:chipStrokeColor="@color/white"
+    app:closeIconEnabled="false"
+    app:chipIconEnabled="false"
+    android:text="MOS"/>

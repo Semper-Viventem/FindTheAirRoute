@@ -6,6 +6,6 @@ import retrofit2.http.Query
 
 interface Api {
 
-    @GET("autocomplete?term=mow&lang=ru")
+    @GET("autocomplete")
     fun getCities(@Query("term") query: String, @Query("lang") lang: String): Single<CitiesResponse>
 }

@@ -42,11 +42,6 @@ abstract class MapScreen<PM> : Screen<PM>(), OnMapReadyCallback where PM : MapSc
 
     abstract fun onBindPresentationModel(view: View, pm: PM)
 
-    override fun handleBack(): Boolean {
-        passTo(presentationModel.backAction.consumer)
-        return true
-    }
-
     override fun onStart() {
         super.onStart()
         mapView?.onStart()
@@ -63,8 +58,8 @@ abstract class MapScreen<PM> : Screen<PM>(), OnMapReadyCallback where PM : MapSc
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         mapView?.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStop() {

@@ -2,19 +2,12 @@ package ru.semper_viventem.findtheairroute.ui.map
 
 import android.os.Bundle
 import android.view.View
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.screen_result.view.*
 import org.koin.android.ext.android.getKoin
 import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.domain.City
-import ru.semper_viventem.findtheairroute.domain.Location
-import ru.semper_viventem.findtheairroute.extensions.toLatLng
 import ru.semper_viventem.findtheairroute.ui.UIModule
 import ru.semper_viventem.findtheairroute.ui.common.MapScreen
 
@@ -23,6 +16,8 @@ class ResultScreen : MapScreen<ResultPm>() {
 
     companion object {
         private const val AIRPLANE_ANIMATION_DURATION = 7000L
+        private const val MARKER_RES_ID = R.drawable.ic_plane
+        private const val MARKER_ROTATION = -90
 
         private const val ARG_FROM_CITY = "from_city"
         private const val ARG_TO_CITY = "to_city"
@@ -48,7 +43,12 @@ class ResultScreen : MapScreen<ResultPm>() {
 
     override fun onInitView(view: View, savedInstanceState: Bundle?) {
         super.onInitView(view, savedInstanceState)
-        routeAnimationDelegate = RouteAnimationDelegate(resources, R.drawable.ic_plane, AIRPLANE_ANIMATION_DURATION)
+        routeAnimationDelegate = RouteAnimationDelegate(
+            context = context!!,
+            imageRes = MARKER_RES_ID,
+            animationDuration = AIRPLANE_ANIMATION_DURATION,
+            markerRotation = MARKER_ROTATION
+        )
     }
 
     override fun onResume() {
@@ -62,15 +62,17 @@ class ResultScreen : MapScreen<ResultPm>() {
     }
 
     override fun onDestroy() {
-        routeAnimationDelegate?.stop()
+        with(routeAnimationDelegate!!) {
+            val progress = animationPosition to animationEnd
+            progress passTo presentationModel.saveProgress
+            destroy()
+        }
+        routeAnimationDelegate = null
         super.onDestroy()
     }
 
     override fun onInitMap(googleMap: GoogleMap) {
-        with(googleMap.uiSettings) {
-            isRotateGesturesEnabled = false
-            isTiltGesturesEnabled = false
-        }
+        // do nothing
     }
 
     override fun onBindPresentationModel(view: View, pm: ResultPm) {
@@ -78,30 +80,18 @@ class ResultScreen : MapScreen<ResultPm>() {
     }
 
     override fun onBindMapPresentationModel(pm: ResultPm, googleMap: GoogleMap) {
-        pm.points bindTo { (fromCity, toCity) ->
-            val markerFrom = addMarker(googleMap, fromCity.location, fromCity.cityName)
-            val markerTo = addMarker(googleMap, toCity.location, toCity.cityName)
 
-            val bounds = LatLngBounds.Builder()
-                .include(markerFrom.position)
-                .include(markerTo.position)
-                .build()
-
-            val cameraOffset = resources.getDimensionPixelOffset(R.dimen.normal_gap)
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, cameraOffset))
-
+        pm.state bindTo { state ->
             if (!routeAnimationDelegate!!.inProgress()) {
-                routeAnimationDelegate!!.start(googleMap, fromCity.location.toLatLng(), toCity.location.toLatLng())
+
+                routeAnimationDelegate!!.start(
+                    googleMap = googleMap,
+                    fromCity = state.from,
+                    toCity = state.to,
+                    begin = state.startPosition,
+                    end = state.endPosition
+                )
             }
         }
-    }
-
-    private fun addMarker(map: GoogleMap, location: Location, title: String): Marker {
-        val marker = MarkerOptions()
-            .position(location.toLatLng())
-            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
-            .title(title)
-
-        return map.addMarker(marker)
     }
 }

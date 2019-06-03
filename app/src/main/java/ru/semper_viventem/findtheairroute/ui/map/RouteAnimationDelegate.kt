@@ -2,131 +2,195 @@ package ru.semper_viventem.findtheairroute.ui.map
 
 import android.animation.Animator
 import android.animation.ValueAnimator
-import android.content.res.Resources
+import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.core.animation.addListener
+import androidx.core.graphics.drawable.toBitmap
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import com.google.android.material.chip.ChipDrawable
+import com.google.maps.android.SphericalUtil
 import ru.semper_viventem.findtheairroute.R
+import ru.semper_viventem.findtheairroute.domain.City
+import ru.semper_viventem.findtheairroute.extensions.toLatLng
 import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
 
+
 class RouteAnimationDelegate(
-    private val resources: Resources,
+    private val context: Context,
     private val imageRes: Int,
-    private val animationDuration: Long
+    private val animationDuration: Long,
+    private val markerRotation: Int = DEFAULT_MARKER_ROTATION
 ) {
 
-    private var airplaneAnimator: Animator? = null
+    companion object {
+        private const val START_ANIMATION = 0F
+        private const val END_ANIMATION = 1F
+        private const val DEFAULT_MARKER_ROTATION = 0
+    }
 
-    fun start(googleMap: GoogleMap, from: LatLng, to: LatLng) {
-        val polyline = drawRoute(googleMap, from, to)
-        startAnimation(googleMap, polyline)
+    private var markerAnimation: Animator? = null
+    private var latLngInterpolator: LatLngBezierInterpolator? = null
+
+    private var airplaneMarker: Marker? = null
+    private var fromCityMarker: Marker? = null
+    private var toCityMarker: Marker? = null
+
+    private var polyline: Polyline? = null
+
+    var animationPosition: Float = START_ANIMATION
+    var animationEnd: Float = END_ANIMATION
+
+    fun start(
+        googleMap: GoogleMap,
+        fromCity: City,
+        toCity: City,
+        begin: Float = START_ANIMATION,
+        end: Float = END_ANIMATION
+    ) {
+
+        val from = fromCity.location.toLatLng()
+        val to = toCity.location.toLatLng()
+
+        initMapState(googleMap, fromCity, toCity)
+        latLngInterpolator = LatLngBezierInterpolator(from, to)
+
+        val firstDuration = (animationDuration * Math.abs(end - begin)).toLong()
+        polyline = drawRoute(googleMap)
+        airplaneMarker = drawAirplane(googleMap, polyline!!)
+        startAnimation(airplaneMarker!!, firstDuration, begin, end)
     }
 
     fun resume() {
-        airplaneAnimator?.resume()
+        markerAnimation?.resume()
     }
 
     fun pause() {
-        airplaneAnimator?.pause()
+        markerAnimation?.pause()
     }
 
-    fun stop() {
-        airplaneAnimator?.cancel()
-        airplaneAnimator = null
+    fun destroy() {
+        killAnimation()
+
+        airplaneMarker?.remove()
+        fromCityMarker?.remove()
+        toCityMarker?.remove()
+        polyline?.remove()
+
+        airplaneMarker = null
+        fromCityMarker = null
+        toCityMarker = null
+        polyline = null
+
+        latLngInterpolator = null
     }
 
-    fun inProgress() = airplaneAnimator?.isStarted == true
+    fun inProgress() = markerAnimation?.isStarted == true
 
-    private fun drawRoute(map: GoogleMap, from: LatLng, to: LatLng): Polyline {
-        val strokeWidth = resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
-        val strokeInterval = resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
-        val polyline = PolylineOptions()
-            .add(*getBezierCurvePoints(from, to).toTypedArray())
+    private fun initMapState(googleMap: GoogleMap, fromCity: City, toCity: City) {
+        fromCityMarker = addMarker(googleMap, fromCity.location.toLatLng(), fromCity.getShortName())
+        toCityMarker = addMarker(googleMap, toCity.location.toLatLng(), toCity.getShortName())
+
+        val bounds = LatLngBounds.Builder()
+            .include(fromCityMarker!!.position)
+            .include(toCityMarker!!.position)
+            .build()
+
+        val cameraOffset = context.resources.getDimensionPixelOffset(R.dimen.big_gap)
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, cameraOffset))
+    }
+
+    private fun drawRoute(googleMap: GoogleMap): Polyline {
+        val strokeWidth = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
+        val strokeInterval = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
+        val polylineOptions = PolylineOptions()
+            .add(*getBezierCurvePoints().toTypedArray())
             .width(strokeWidth)
             .jointType(JointType.ROUND)
+            .geodesic(true)
             .color(Color.GRAY)
-            .pattern(listOf(Gap(strokeInterval), Dash(strokeInterval)))
+            .pattern(listOf(Gap(strokeInterval), Dot()))
 
-        return map.addPolyline(polyline)
+        return googleMap.addPolyline(polylineOptions)
     }
 
-    private fun startAnimation(map: GoogleMap, polyline: Polyline) {
+    private fun drawAirplane(googleMap: GoogleMap, polyline: Polyline): Marker {
         val points = polyline.points
 
-        val airplane = map.addMarker(
+        return googleMap.addMarker(
             MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(imageRes))
                 .position(points.first())
                 .anchor(0.5F, 0.5F)
+                .flat(true)
         )
-
-        val intervalDuration = animationDuration / points.count()
-
-        animateNextInterval(airplane, points, intervalDuration, 0, false)
     }
 
-    private fun animateNextInterval(airplane: Marker, points: List<LatLng>, intervalDuration: Long, intervalNumber: Int, isReverse: Boolean) {
+    private fun addMarker(googleMap: GoogleMap, location: LatLng, title: String): Marker {
+        val marker = MarkerOptions()
+            .position(location)
+            .icon(getCityMarker(title))
+            .flat(true)
+            .anchor(0.5F, 0.5F)
 
-        airplaneAnimator?.cancel()
-        airplaneAnimator = null
-        val nextIsReverse = if (intervalNumber == 0 && isReverse) {
-            false
-        } else if (intervalNumber == points.lastIndex && !isReverse) {
-            true
-        } else {
-            isReverse
-        }
-        val nextIntervalNumber = if (nextIsReverse) intervalNumber - 1 else intervalNumber + 1
+        return googleMap.addMarker(marker)
+    }
 
-        val currentPosition = points[intervalNumber]
-        val nextPosition = points[nextIntervalNumber]
+    private fun startAnimation(airplane: Marker, animationDuration: Long, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
+        animationEnd = end
 
-        airplaneAnimator = ValueAnimator.ofFloat(0F, 1F).apply {
-            duration = intervalDuration
+        killAnimation()
+        markerAnimation = ValueAnimator.ofFloat(begin, end).apply {
+            duration = animationDuration
             addUpdateListener {
-                handleTact(airplane, currentPosition, nextPosition, it.animatedValue as Float)
+                val v = it.animatedValue as Float
+                animationPosition = v
+
+                if (latLngInterpolator == null) return@addUpdateListener
+                val nextPosition = latLngInterpolator!!.interpolate(v.toDouble())
+
+                airplane.rotation = angleFromCoordinate(airplane.position, nextPosition)
+                airplane.position = nextPosition
             }
             addListener(onEnd = {
-                animateNextInterval(airplane, points, intervalDuration, nextIntervalNumber, nextIsReverse)
+                startAnimation(airplane, this@RouteAnimationDelegate.animationDuration, end, 1 - end)
             })
             start()
         }
     }
 
-    private fun handleTact(marker: Marker, startPosition: LatLng, endPosition: LatLng, value: Float) {
-        val lng = value * endPosition.longitude + (1 - value) * startPosition.longitude
-        val lat = value * endPosition.latitude + (1 - value) * startPosition.latitude
-        val newPos = LatLng(lat, lng)
-        marker.position = newPos
-        marker.rotation = getBearing(marker.position, endPosition)
+    private fun killAnimation() {
+        markerAnimation?.removeAllListeners()
+        markerAnimation?.cancel()
+        markerAnimation = null
     }
 
-    private fun getBearing(begin: LatLng, end: LatLng): Float {
-        val lat = Math.abs(begin.latitude - end.latitude)
-        val lng = Math.abs(begin.longitude - end.longitude)
-
-        val bearing = if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
-            Math.toDegrees(Math.atan(lng / lat)).toFloat()
-        } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
-            (90 - Math.toDegrees(Math.atan(lng / lat)) + 90).toFloat()
-        } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
-            (Math.toDegrees(Math.atan(lng / lat)) + 180).toFloat()
-        } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
-            (90 - Math.toDegrees(Math.atan(lng / lat)) + 270).toFloat()
-        } else 0F
-
-        return bearing - 90
+    private fun angleFromCoordinate(begin: LatLng, end: LatLng): Float {
+        return SphericalUtil.computeHeading(begin, end).toFloat() + markerRotation
     }
 
-    private fun getBezierCurvePoints(from: LatLng, to: LatLng): List<LatLng> {
+    private fun getBezierCurvePoints(): List<LatLng> {
         val points = mutableListOf<LatLng>()
-        val interpolator = LatLngBezierInterpolator(from, to)
         var t = 0.0
         while (t < 1.000001) {
-            points.add(interpolator.interpolate(t))
+            points.add(latLngInterpolator!!.interpolate(t))
             t += 0.01F
         }
         return points
+    }
+
+    private fun getCityMarker(name: String): BitmapDescriptor {
+        val drawable = ChipDrawable.createFromResource(context, R.xml.city_chip_drawable)
+        drawable.setText(name)
+
+        val bitmap = drawable.toBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 }

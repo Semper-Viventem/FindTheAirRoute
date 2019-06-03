@@ -72,7 +72,7 @@ class ResultScreen : MapScreen<ResultPm>() {
         with(routeAnimationDelegate!!) {
             val progress = animationPosition to animationEnd
             progress passTo presentationModel.saveProgress
-            stop()
+            destroy()
         }
         routeAnimationDelegate = null
         super.onDestroy()

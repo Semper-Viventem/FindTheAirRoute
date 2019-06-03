@@ -12,7 +12,6 @@ import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
 
 
-
 class RouteAnimationDelegate(
     private val context: Context,
     private val imageRes: Int,
@@ -26,7 +25,7 @@ class RouteAnimationDelegate(
         private const val DEFAULT_MARKER_ROTATION = 0
     }
 
-    private var airplaneAnimator: Animator? = null
+    private var markerAnimation: Animator? = null
     private var latLngInterpolator: LatLngBezierInterpolator? = null
     var animationPosition: Float = START_ANIMATION
     var animationEnd: Float = END_ANIMATION
@@ -41,19 +40,19 @@ class RouteAnimationDelegate(
     }
 
     fun resume() {
-        airplaneAnimator?.resume()
+        markerAnimation?.resume()
     }
 
     fun pause() {
-        airplaneAnimator?.pause()
+        markerAnimation?.pause()
     }
 
-    fun stop() {
+    fun destroy() {
         killAnimation()
         latLngInterpolator = null
     }
 
-    fun inProgress() = airplaneAnimator?.isStarted == true
+    fun inProgress() = markerAnimation?.isStarted == true
 
     private fun drawRoute(map: GoogleMap): Polyline {
         val strokeWidth = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
@@ -85,7 +84,7 @@ class RouteAnimationDelegate(
         animationEnd = end
 
         killAnimation()
-        airplaneAnimator = ValueAnimator.ofFloat(begin, end).apply {
+        markerAnimation = ValueAnimator.ofFloat(begin, end).apply {
             duration = animationDuration
             addUpdateListener {
                 val v = it.animatedValue as Float
@@ -105,8 +104,9 @@ class RouteAnimationDelegate(
     }
 
     private fun killAnimation() {
-        airplaneAnimator?.cancel()
-        airplaneAnimator = null
+        markerAnimation?.removeAllListeners()
+        markerAnimation?.cancel()
+        markerAnimation = null
     }
 
     private fun angleFromCoordinate(begin: LatLng, end: LatLng): Float {

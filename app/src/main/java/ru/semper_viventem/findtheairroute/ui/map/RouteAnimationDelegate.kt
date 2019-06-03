@@ -7,33 +7,37 @@ import android.graphics.Color
 import androidx.core.animation.addListener
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import com.google.maps.android.SphericalUtil
 import ru.semper_viventem.findtheairroute.R
 import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
+
+
 
 class RouteAnimationDelegate(
     private val context: Context,
     private val imageRes: Int,
-    private val fullDuration: Long
+    private val animationDuration: Long,
+    private val markerRotation: Int = DEFAULT_MARKER_ROTATION
 ) {
 
     companion object {
         private const val START_ANIMATION = 0F
         private const val END_ANIMATION = 1F
+        private const val DEFAULT_MARKER_ROTATION = 0
     }
 
     private var airplaneAnimator: Animator? = null
     private var latLngInterpolator: LatLngBezierInterpolator? = null
-    private var airplaneDuration: Long = fullDuration
     var animationPosition: Float = START_ANIMATION
     var animationEnd: Float = END_ANIMATION
 
     fun start(googleMap: GoogleMap, from: LatLng, to: LatLng, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
         latLngInterpolator = LatLngBezierInterpolator(from, to)
 
-        airplaneDuration = (fullDuration - (fullDuration * begin)).toLong()
+        val firstDuration = (animationDuration * Math.abs(end - begin)).toLong()
         val polyline = drawRoute(googleMap)
         val airplane = drawAirplane(googleMap, polyline)
-        startAnimation(airplane, begin, end)
+        startAnimation(airplane, firstDuration, begin, end)
     }
 
     fun resume() {
@@ -77,12 +81,12 @@ class RouteAnimationDelegate(
         )
     }
 
-    private fun startAnimation(airplane: Marker, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
+    private fun startAnimation(airplane: Marker, animationDuration: Long, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
         animationEnd = end
 
         killAnimation()
         airplaneAnimator = ValueAnimator.ofFloat(begin, end).apply {
-            duration = airplaneDuration
+            duration = animationDuration
             addUpdateListener {
                 val v = it.animatedValue as Float
                 animationPosition = v
@@ -90,12 +94,11 @@ class RouteAnimationDelegate(
                 if (latLngInterpolator == null) return@addUpdateListener
                 val nextPosition = latLngInterpolator!!.interpolate(v.toDouble())
 
-                airplane.rotation = getBearing(airplane.position, nextPosition)
+                airplane.rotation = angleFromCoordinate(airplane.position, nextPosition)
                 airplane.position = nextPosition
             }
             addListener(onEnd = {
-                airplaneDuration = fullDuration
-                startAnimation(airplane, end, 1 - end)
+                startAnimation(airplane, this@RouteAnimationDelegate.animationDuration, end, 1 - end)
             })
             start()
         }
@@ -106,21 +109,8 @@ class RouteAnimationDelegate(
         airplaneAnimator = null
     }
 
-    private fun getBearing(begin: LatLng, end: LatLng): Float {
-        val lat = Math.abs(begin.latitude - end.latitude)
-        val lng = Math.abs(begin.longitude - end.longitude)
-
-        val bearing = if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
-            Math.toDegrees(Math.atan(lng / lat)).toFloat()
-        } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
-            (90 - Math.toDegrees(Math.atan(lng / lat)) + 90).toFloat()
-        } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
-            (Math.toDegrees(Math.atan(lng / lat)) + 180).toFloat()
-        } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
-            (90 - Math.toDegrees(Math.atan(lng / lat)) + 270).toFloat()
-        } else 0F
-
-        return bearing - 90
+    private fun angleFromCoordinate(begin: LatLng, end: LatLng): Float {
+        return SphericalUtil.computeHeading(begin, end).toFloat() + markerRotation
     }
 
     private fun getBezierCurvePoints(): List<LatLng> {

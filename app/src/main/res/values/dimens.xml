@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="normal_gap">16dp</dimen>
+    <dimen name="big_gap">32dp</dimen>
     <dimen name="field_radius">10dp</dimen>
     <dimen name="route_stroke_width">4dp</dimen>
     <dimen name="chip_stroke_width">1dp</dimen>

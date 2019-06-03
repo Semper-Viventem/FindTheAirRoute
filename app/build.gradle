@@ -90,12 +90,13 @@ dependencies {
     testImplementation "org.mockito:mockito-core:2.27.0"
     testImplementation "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"
     androidTestImplementation "org.koin:koin-test:$koin_version"
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test:rules:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
 
     // Maps
     implementation 'com.google.android.gms:play-services-maps:16.1.0'
+    implementation 'com.google.maps.android:android-maps-utils:0.5'
 }
 apply plugin: 'com.android.application'

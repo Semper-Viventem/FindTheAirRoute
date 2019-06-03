@@ -23,6 +23,8 @@ class ResultScreen : MapScreen<ResultPm>() {
 
     companion object {
         private const val AIRPLANE_ANIMATION_DURATION = 7000L
+        private const val MARKER_RES_ID = R.drawable.ic_plane
+        private const val MARKER_ROTATION = -90
 
         private const val ARG_FROM_CITY = "from_city"
         private const val ARG_TO_CITY = "to_city"
@@ -48,7 +50,12 @@ class ResultScreen : MapScreen<ResultPm>() {
 
     override fun onInitView(view: View, savedInstanceState: Bundle?) {
         super.onInitView(view, savedInstanceState)
-        routeAnimationDelegate = RouteAnimationDelegate(context!!, R.drawable.ic_plane, AIRPLANE_ANIMATION_DURATION)
+        routeAnimationDelegate = RouteAnimationDelegate(
+            context = context!!,
+            imageRes = MARKER_RES_ID,
+            animationDuration = AIRPLANE_ANIMATION_DURATION,
+            markerRotation = MARKER_ROTATION
+        )
     }
 
     override fun onResume() {
@@ -92,7 +99,7 @@ class ResultScreen : MapScreen<ResultPm>() {
                 .include(markerTo.position)
                 .build()
 
-            val cameraOffset = resources.getDimensionPixelOffset(R.dimen.normal_gap)
+            val cameraOffset = resources.getDimensionPixelOffset(R.dimen.big_gap)
             googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, cameraOffset))
 
             if (!routeAnimationDelegate!!.inProgress()) {
@@ -101,7 +108,8 @@ class ResultScreen : MapScreen<ResultPm>() {
                     from = fromCity.location.toLatLng(),
                     to = toCity.location.toLatLng(),
                     begin = state.startPosition,
-                    end = state.endPosition)
+                    end = state.endPosition
+                )
             }
         }
     }
@@ -120,7 +128,11 @@ class ResultScreen : MapScreen<ResultPm>() {
         val drawable = ChipDrawable.createFromResource(context, R.xml.city_chip_drawable)
         drawable.setText(name)
 
-        val bitmap = drawable.toBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = drawable.toBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
 
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }

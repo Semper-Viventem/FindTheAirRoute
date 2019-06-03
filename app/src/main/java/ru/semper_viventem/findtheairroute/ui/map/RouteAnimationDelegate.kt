@@ -3,12 +3,18 @@ package ru.semper_viventem.findtheairroute.ui.map
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.core.animation.addListener
+import androidx.core.graphics.drawable.toBitmap
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import com.google.android.material.chip.ChipDrawable
 import com.google.maps.android.SphericalUtil
 import ru.semper_viventem.findtheairroute.R
+import ru.semper_viventem.findtheairroute.domain.City
+import ru.semper_viventem.findtheairroute.extensions.toLatLng
 import ru.semper_viventem.findtheairroute.ui.common.LatLngBezierInterpolator
 
 
@@ -27,16 +33,34 @@ class RouteAnimationDelegate(
 
     private var markerAnimation: Animator? = null
     private var latLngInterpolator: LatLngBezierInterpolator? = null
+
+    private var airplaneMarker: Marker? = null
+    private var fromCityMarker: Marker? = null
+    private var toCityMarker: Marker? = null
+
+    private var polyline: Polyline? = null
+
     var animationPosition: Float = START_ANIMATION
     var animationEnd: Float = END_ANIMATION
 
-    fun start(googleMap: GoogleMap, from: LatLng, to: LatLng, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
+    fun start(
+        googleMap: GoogleMap,
+        fromCity: City,
+        toCity: City,
+        begin: Float = START_ANIMATION,
+        end: Float = END_ANIMATION
+    ) {
+
+        val from = fromCity.location.toLatLng()
+        val to = toCity.location.toLatLng()
+
+        initMapState(googleMap, fromCity, toCity)
         latLngInterpolator = LatLngBezierInterpolator(from, to)
 
         val firstDuration = (animationDuration * Math.abs(end - begin)).toLong()
-        val polyline = drawRoute(googleMap)
-        val airplane = drawAirplane(googleMap, polyline)
-        startAnimation(airplane, firstDuration, begin, end)
+        polyline = drawRoute(googleMap)
+        airplaneMarker = drawAirplane(googleMap, polyline!!)
+        startAnimation(airplaneMarker!!, firstDuration, begin, end)
     }
 
     fun resume() {
@@ -49,15 +73,39 @@ class RouteAnimationDelegate(
 
     fun destroy() {
         killAnimation()
+
+        airplaneMarker?.remove()
+        fromCityMarker?.remove()
+        toCityMarker?.remove()
+        polyline?.remove()
+
+        airplaneMarker = null
+        fromCityMarker = null
+        toCityMarker = null
+        polyline = null
+
         latLngInterpolator = null
     }
 
     fun inProgress() = markerAnimation?.isStarted == true
 
-    private fun drawRoute(map: GoogleMap): Polyline {
+    private fun initMapState(googleMap: GoogleMap, fromCity: City, toCity: City) {
+        fromCityMarker = addMarker(googleMap, fromCity.location.toLatLng(), fromCity.getShortName())
+        toCityMarker = addMarker(googleMap, toCity.location.toLatLng(), toCity.getShortName())
+
+        val bounds = LatLngBounds.Builder()
+            .include(fromCityMarker!!.position)
+            .include(toCityMarker!!.position)
+            .build()
+
+        val cameraOffset = context.resources.getDimensionPixelOffset(R.dimen.big_gap)
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, cameraOffset))
+    }
+
+    private fun drawRoute(googleMap: GoogleMap): Polyline {
         val strokeWidth = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_width).toFloat()
         val strokeInterval = context.resources.getDimensionPixelOffset(R.dimen.route_stroke_interval).toFloat()
-        val polyline = PolylineOptions()
+        val polylineOptions = PolylineOptions()
             .add(*getBezierCurvePoints().toTypedArray())
             .width(strokeWidth)
             .jointType(JointType.ROUND)
@@ -65,19 +113,29 @@ class RouteAnimationDelegate(
             .color(Color.GRAY)
             .pattern(listOf(Gap(strokeInterval), Dot()))
 
-        return map.addPolyline(polyline)
+        return googleMap.addPolyline(polylineOptions)
     }
 
-    private fun drawAirplane(map: GoogleMap, polyline: Polyline): Marker {
+    private fun drawAirplane(googleMap: GoogleMap, polyline: Polyline): Marker {
         val points = polyline.points
 
-        return map.addMarker(
+        return googleMap.addMarker(
             MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(imageRes))
                 .position(points.first())
                 .anchor(0.5F, 0.5F)
                 .flat(true)
         )
+    }
+
+    private fun addMarker(googleMap: GoogleMap, location: LatLng, title: String): Marker {
+        val marker = MarkerOptions()
+            .position(location)
+            .icon(getCityMarker(title))
+            .flat(true)
+            .anchor(0.5F, 0.5F)
+
+        return googleMap.addMarker(marker)
     }
 
     private fun startAnimation(airplane: Marker, animationDuration: Long, begin: Float = START_ANIMATION, end: Float = END_ANIMATION) {
@@ -121,5 +179,18 @@ class RouteAnimationDelegate(
             t += 0.01F
         }
         return points
+    }
+
+    private fun getCityMarker(name: String): BitmapDescriptor {
+        val drawable = ChipDrawable.createFromResource(context, R.xml.city_chip_drawable)
+        drawable.setText(name)
+
+        val bitmap = drawable.toBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
+
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 }

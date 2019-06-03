@@ -15,9 +15,6 @@ class ResultPm(
         val endPosition: Float
     )
 
-    /**
-     * Pair with [fromCity] and [toCity]
-     */
     val state = State<ScreenState>()
     private val animationProgress = State(0F to 1F)
 

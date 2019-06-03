@@ -58,8 +58,8 @@ abstract class MapScreen<PM> : Screen<PM>(), OnMapReadyCallback where PM : MapSc
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         mapView?.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onStop() {
